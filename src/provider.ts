@@ -68,7 +68,7 @@ export class LanguageDataProvider
         ...output[v],
         language: v,
       }))
-      .sort((a, b) => (a.size > b.size ? -1 : 1))
+      .sort((a, b) => b.size - a.size)
       .map(toLang);
   }
 }
