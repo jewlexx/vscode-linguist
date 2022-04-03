@@ -45,16 +45,9 @@ export class LanguageDataProvider
   }
 
   private async getLanguages(): Promise<LanguageData[]> {
-    const toLang = ({
-      name,
-      size,
-      files,
-      percentage,
-    }: LanguageDataBase): LanguageData => {
-      return new LanguageData(this.ctx, name, {
-        size,
-        percentage,
-        files,
+    const toLang = (opt: LanguageDataBase): LanguageData => {
+      return new LanguageData(this.ctx, opt.name, {
+        ...opt,
         collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
       });
     };
@@ -75,6 +68,7 @@ export class LanguageDataProvider
         ...output[v],
         language: v,
       }))
+      .sort((a, b) => (a.size > b.size ? -1 : 1))
       .map(toLang);
   }
 }
