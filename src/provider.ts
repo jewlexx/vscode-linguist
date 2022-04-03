@@ -100,7 +100,7 @@ export class LanguageData extends vscode.TreeItem {
       const wf = vscode.workspace.workspaceFolders?.[0].uri.path ?? '';
       const uris = options.files.map((f) => vscode.Uri.file(path.join(wf, f)));
 
-      this.description = `${options.percentage}% - ${options.size} bytes`;
+      this.description = `${options.percentage}%`;
       this.files = uris;
     }
   }
