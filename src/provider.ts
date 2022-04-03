@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { execa } from 'execa';
 import * as path from 'path';
+import { icons } from './fileIcons';
 
 import type { LinguistOutput, LanguageDataBase } from './types';
 
@@ -12,6 +13,8 @@ export class LanguageDataProvider
   > = new vscode.EventEmitter<LanguageData | undefined | void>();
   readonly onDidChangeTreeData: vscode.Event<LanguageData | undefined | void> =
     this._onDidChangeTreeData.event;
+
+  constructor(private readonly ctx: vscode.ExtensionContext) {}
 
   refresh(): void {
     this._onDidChangeTreeData.fire();
@@ -25,7 +28,7 @@ export class LanguageDataProvider
     if (element) {
       return Promise.resolve(
         element.files.map((v) => {
-          const el = new LanguageData(v);
+          const el = new LanguageData(this.ctx, v);
 
           el.command = {
             command: 'vscode.open',
@@ -48,7 +51,7 @@ export class LanguageDataProvider
       files,
       percentage,
     }: LanguageDataBase): LanguageData => {
-      return new LanguageData(name, {
+      return new LanguageData(this.ctx, name, {
         size,
         percentage,
         files,
@@ -82,6 +85,7 @@ export class LanguageData extends vscode.TreeItem {
   contextValue = 'language';
 
   constructor(
+    private readonly ctx: vscode.ExtensionContext,
     public readonly name: string | vscode.Uri,
     public readonly options?: {
       size: number;
@@ -104,4 +108,25 @@ export class LanguageData extends vscode.TreeItem {
       this.files = uris;
     }
   }
+
+  get getIconPath(): vscode.Uri | undefined {
+    // Return because it is a file not a language and vscode handles that already
+    if (typeof this.name !== 'string') {
+      return;
+    }
+
+    const name = this.name ?? 'file';
+
+    const p = path.join(
+      this.ctx.extensionPath,
+      'resources',
+      `${name.toLowerCase()}.svg`,
+    );
+
+    console.log(p);
+
+    return vscode.Uri.file(p);
+  }
+
+  iconPath = this.getIconPath;
 }
