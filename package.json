@@ -2,7 +2,7 @@
   "name": "linguist",
   "displayName": "linguist",
   "version": "0.1.0",
-  "description": "",
+  "description": "VSCode wrapper for github linguist",
   "categories": [
     "Other"
   ],
