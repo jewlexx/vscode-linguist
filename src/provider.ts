@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { LanguageColors, LinguistOutput, LanguageDataBase } from './types';
 import { execa } from 'execa';
-import axios from 'axios';
-import path = require('path');
+import * as path from 'path';
+
+import type { LinguistOutput, LanguageDataBase } from './types';
 
 export class LanguageDataProvider
   implements vscode.TreeDataProvider<LanguageData>
@@ -44,13 +44,11 @@ export class LanguageDataProvider
   private async getLanguages(): Promise<LanguageData[]> {
     const toLang = ({
       name,
-      color,
       size,
       files,
       percentage,
     }: LanguageDataBase): LanguageData => {
       return new LanguageData(name, {
-        color,
         size,
         percentage,
         files,
@@ -64,9 +62,6 @@ export class LanguageDataProvider
       return [];
     }
 
-    const linguistFile =
-      'https://raw.githubusercontent.com/ozh/github-colors/master/colors.json';
-    const { data: file } = await axios.get<LanguageColors>(linguistFile);
     const r = await execa('github-linguist', [wf, '--json', '-b']);
 
     const output: LinguistOutput = JSON.parse(r.stdout);
@@ -76,7 +71,6 @@ export class LanguageDataProvider
         name: v,
         ...output[v],
         language: v,
-        color: file[v].color || '#FFFFFF',
       }))
       .map(toLang);
   }
@@ -90,7 +84,6 @@ export class LanguageData extends vscode.TreeItem {
   constructor(
     public readonly name: string | vscode.Uri,
     public readonly options?: {
-      color: string;
       size: number;
       percentage: string;
       files: string[];

@@ -42,10 +42,12 @@
   ],
   "dependencies": {
     "axios": "0.26.1",
-    "execa": "6.1.0"
+    "execa": "6.1.0",
+    "js-yaml": "4.1.0"
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
+    "@types/js-yaml": "4.0.5",
     "@types/mocha": "^9.1.0",
     "@types/node": "14.x",
     "@types/vscode": "^1.66.0",
