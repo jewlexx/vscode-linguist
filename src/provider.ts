@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import { LanguageColors, LinguistOutput, LanguageDataBase } from './types';
 import { execa } from 'execa';
 import axios from 'axios';
@@ -50,7 +49,7 @@ export class LanguageDataProvider
     const linguistFile =
       'https://raw.githubusercontent.com/ozh/github-colors/master/colors.json';
     const { data: file } = await axios.get<LanguageColors>(linguistFile);
-    const r = await execa('github-linguist', [wf, '--json']);
+    const r = await execa('github-linguist', [wf, '--json', '-b']);
 
     const output: LinguistOutput = JSON.parse(r.stdout);
 
@@ -62,16 +61,6 @@ export class LanguageDataProvider
         color: file[v].color || '#FFFFFF',
       }))
       .map(toLang);
-  }
-
-  private pathExists(p: string): boolean {
-    try {
-      fs.accessSync(p);
-    } catch (err) {
-      return false;
-    }
-
-    return true;
   }
 }
 
@@ -85,8 +74,8 @@ export class LanguageData extends vscode.TreeItem {
   ) {
     super(name, collapsibleState);
 
-    this.tooltip = `<span style="color:blue">${name}</span>`;
-    this.description = this.color;
+    this.tooltip = name;
+    this.description = `${percentage}% - ${size} bytes`;
   }
 
   contextValue = 'language';

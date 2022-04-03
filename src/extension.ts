@@ -1,9 +1,6 @@
 import * as vscode from 'vscode';
 import { LanguageDataProvider } from './provider';
 
-const linguistFile =
-  'https://raw.githubusercontent.com/ozh/github-colors/master/colors.json';
-
 export async function activate(ctx: vscode.ExtensionContext) {
   const wf = vscode.workspace.workspaceFolders?.[0].uri.path;
 
