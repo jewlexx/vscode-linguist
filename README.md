@@ -14,7 +14,15 @@ For example if there is an image subfolder under your extension project workspac
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- You MUST have [Github Linguist](https://github.com/github/linguist) installed and in your path. This is being worked on
+
+## TODO
+
+[] - Remove Github Linguist dependency
+
+[] - Use user selected file icons rather than hardcoded ones
+
+[] - Fix conflicts with language names and icon names
 
 ## Extension Settings
 
