@@ -1,13 +1,7 @@
 import * as vscode from 'vscode';
 import { LanguageDataProvider } from './provider';
 
-export async function activate(ctx: vscode.ExtensionContext) {
-  const wf = vscode.workspace.workspaceFolders?.[0].uri.path;
-
-  if (!wf) {
-    return;
-  }
-
+export async function activate(_: vscode.ExtensionContext) {
   let provider = new LanguageDataProvider();
   vscode.window.registerTreeDataProvider('languages', provider);
 }

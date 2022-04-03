@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { LanguageColors, LinguistOutput, LanguageDataBase } from './types';
 import { execa } from 'execa';
 import axios from 'axios';
+import path = require('path');
 
 export class LanguageDataProvider
   implements vscode.TreeDataProvider<LanguageData>
@@ -22,7 +23,20 @@ export class LanguageDataProvider
 
   getChildren(element?: LanguageData): Thenable<LanguageData[]> {
     if (element) {
-      return Promise.resolve(element.files.map((v) => new LanguageData(v)));
+      return Promise.resolve(
+        element.files.map((v) => {
+          const el = new LanguageData(v);
+
+          el.command = {
+            command: 'vscode.open',
+            title: 'Open File',
+            arguments: [v],
+          };
+          el.contextValue = 'file';
+
+          return el;
+        }),
+      );
     }
     return this.getLanguages();
   }
@@ -69,12 +83,12 @@ export class LanguageDataProvider
 }
 
 export class LanguageData extends vscode.TreeItem {
-  files: string[] = [];
+  files: vscode.Uri[] = [];
 
   contextValue = 'language';
 
   constructor(
-    public readonly name: string,
+    public readonly name: string | vscode.Uri,
     public readonly options?: {
       color: string;
       size: number;
@@ -83,13 +97,18 @@ export class LanguageData extends vscode.TreeItem {
       collapsibleState: vscode.TreeItemCollapsibleState;
     },
   ) {
-    super(name, options?.collapsibleState);
+    super(name as any, options?.collapsibleState);
 
-    this.tooltip = name;
+    if (typeof name === 'string') {
+      this.label = name;
+    }
 
     if (options) {
+      const wf = vscode.workspace.workspaceFolders?.[0].uri.path ?? '';
+      const uris = options.files.map((f) => vscode.Uri.file(path.join(wf, f)));
+
       this.description = `${options.percentage}% - ${options.size} bytes`;
-      this.files = options.files;
+      this.files = uris;
     }
   }
 }
