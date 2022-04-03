@@ -20,7 +20,10 @@ export class LanguageDataProvider
     return element;
   }
 
-  getChildren(): Thenable<LanguageData[]> {
+  getChildren(element?: LanguageData): Thenable<LanguageData[]> {
+    if (element) {
+      return Promise.resolve(element.files.map((v) => new LanguageData(v)));
+    }
     return this.getLanguages();
   }
 
@@ -29,15 +32,16 @@ export class LanguageDataProvider
       name,
       color,
       size,
+      files,
       percentage,
     }: LanguageDataBase): LanguageData => {
-      return new LanguageData(
-        name,
+      return new LanguageData(name, {
         color,
         size,
         percentage,
-        vscode.TreeItemCollapsibleState.None,
-      );
+        files,
+        collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+      });
     };
 
     const wf = vscode.workspace.workspaceFolders?.[0].uri.path;
@@ -65,18 +69,27 @@ export class LanguageDataProvider
 }
 
 export class LanguageData extends vscode.TreeItem {
-  constructor(
-    public readonly name: string,
-    public readonly color: string,
-    public readonly size: number,
-    public readonly percentage: string,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-  ) {
-    super(name, collapsibleState);
-
-    this.tooltip = name;
-    this.description = `${percentage}% - ${size} bytes`;
-  }
+  files: string[] = [];
 
   contextValue = 'language';
+
+  constructor(
+    public readonly name: string,
+    public readonly options?: {
+      color: string;
+      size: number;
+      percentage: string;
+      files: string[];
+      collapsibleState: vscode.TreeItemCollapsibleState;
+    },
+  ) {
+    super(name, options?.collapsibleState);
+
+    this.tooltip = name;
+
+    if (options) {
+      this.description = `${options.percentage}% - ${options.size} bytes`;
+      this.files = options.files;
+    }
+  }
 }

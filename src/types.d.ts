@@ -13,6 +13,7 @@ export interface LinguistOutput {
 export interface Script {
   size: number;
   percentage: string;
+  files: string[];
 }
 
 export interface LanguageDataBase extends Script {
