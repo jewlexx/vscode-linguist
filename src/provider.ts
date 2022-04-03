@@ -3,7 +3,7 @@ import { execa } from 'execa';
 import * as path from 'path';
 import { icons } from './fileIcons';
 
-import type { LinguistOutput, LanguageDataBase } from './types';
+import type { LinguistOutput, LanguageDataBase, LinguistConfig } from './types';
 
 export class LanguageDataProvider
   implements vscode.TreeDataProvider<LanguageData>
@@ -14,7 +14,10 @@ export class LanguageDataProvider
   readonly onDidChangeTreeData: vscode.Event<LanguageData | undefined | void> =
     this._onDidChangeTreeData.event;
 
-  constructor(private readonly ctx: vscode.ExtensionContext) {}
+  constructor(
+    private readonly ctx: vscode.ExtensionContext,
+    private readonly config: LinguistConfig,
+  ) {}
 
   refresh(): void {
     this._onDidChangeTreeData.fire();
@@ -28,7 +31,7 @@ export class LanguageDataProvider
     if (element) {
       return Promise.resolve(
         element.files.map((v) => {
-          const el = new LanguageData(this.ctx, v);
+          const el = new LanguageData(this.ctx, this.config, v);
 
           el.command = {
             command: 'vscode.open',
@@ -46,7 +49,7 @@ export class LanguageDataProvider
 
   private async getLanguages(): Promise<LanguageData[]> {
     const toLang = (opt: LanguageDataBase): LanguageData => {
-      return new LanguageData(this.ctx, opt.name, {
+      return new LanguageData(this.ctx, this.config, opt.name, {
         ...opt,
         collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
       });
@@ -63,11 +66,13 @@ export class LanguageDataProvider
     const output: LinguistOutput = JSON.parse(r.stdout);
 
     return Object.keys(output)
-      .map((v) => ({
-        name: v,
-        ...output[v],
-        language: v,
-      }))
+      .map((v) => {
+        return {
+          name: v,
+          ...output[v],
+          language: v,
+        };
+      })
       .sort((a, b) => b.size - a.size)
       .map(toLang);
   }
@@ -80,6 +85,7 @@ export class LanguageData extends vscode.TreeItem {
 
   constructor(
     private readonly ctx: vscode.ExtensionContext,
+    private readonly config: LinguistConfig,
     public readonly name: string | vscode.Uri,
     public readonly options?: {
       size: number;
@@ -109,15 +115,27 @@ export class LanguageData extends vscode.TreeItem {
       return;
     }
 
-    const name = this.name ?? 'file';
+    const lang = this.config[this.name].extensions ?? [];
+    const name =
+      icons.icons.find((x) => {
+        const len = lang.filter((v) => {
+          const i = x.fileExtensions?.includes(v.substring(1));
+          // console.log(x.fileExtensions?.[i ?? 0]);
+          return i;
+        }).length;
+
+        // console.log(len);
+
+        return len > 0;
+      })?.name ?? 'file';
+
+    // console.log(name);
 
     const p = path.join(
       this.ctx.extensionPath,
       'resources',
       `${name.toLowerCase()}.svg`,
     );
-
-    console.log(p);
 
     return vscode.Uri.file(p);
   }
